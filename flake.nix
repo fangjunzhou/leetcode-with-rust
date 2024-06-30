@@ -26,7 +26,7 @@
             {
               buildInputs = with pkgs; [
                 # Rust development tools.
-                rust-bin.stable.latest.default
+                rust-bin.nightly.latest.default
               ];
             };
         }
