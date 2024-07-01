@@ -8,29 +8,31 @@
 //! deleting some or no elements without changing the order of the remaining
 //! elements.
 
-/// # Def
+/// # Maximum Length of the Subsequence
+///
+/// ## Def
 ///
 /// Subsequence: PDEP -> item deposit to a new array.
 ///
-/// # Attempt 1: DP
+/// ## Attempt 1: DP
 ///
 /// When deriving a subsequence, for each num in the array, I can choose to pick
 /// it or not. For all vectors of size `n`, there're `2^n` subsequences.
 ///
-/// If we have solved the max valid subsequence &nums[1..n], we can choose to
-/// use nums[n] or not.
+/// If we have solved the max valid subsequence `&nums[1..n]`, we can choose to
+/// use `nums[n]` or not.
 ///
-/// If we pick nums[n], we have guarantee that the new subsequence is still
+/// If we pick `nums[n]`, we have guarantee that the new subsequence is still
 /// valid.
 ///
 /// There are two problems:
 ///
-/// - We don't know the exact subsequence derived from &nums[1..n], we only know
-///   the length of that sequence.
+/// - We don't know the exact subsequence derived from `&nums[1..n]`, we only
+///   know the length of that sequence.
 /// - There might be multiple subsequence with the same max length in
-///   &nums[1..n]
+///   `&nums[1..n]`
 ///
-/// # Attempt 2
+/// ## Attempt 2
 ///
 /// - All sum of the consecutive numbers in the subsequence will have the same
 ///   residual mod 2
@@ -49,7 +51,7 @@ pub fn maximum_length(nums: Vec<i32>) -> i32 {
 
     // Even subsequence.
     let mut num_even = 0;
-    // Odd subsequence>
+    // Odd subsequence.
     let mut num_odd = 0;
     // Alternating subsequence.
     let mut num_shift = 1;
