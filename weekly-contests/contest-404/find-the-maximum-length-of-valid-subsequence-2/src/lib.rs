@@ -31,7 +31,7 @@
 ///     - `a % 2 = 0` and `b % 2 = 1` (a is even and b is odd)
 ///     - `a % 2 = 1` and `b % 2 = 0` (a is odd and b is even)
 /// - In 3202:
-///   - When `(a + b) % 2 = c`
+///   - When `(a + b) % k = c`
 ///     - ???
 ///
 /// ## Key Observation from Discrete Math
@@ -83,7 +83,40 @@
 /// - The length of the sequence. You should use this to find the max
 ///   subsequence.
 pub fn maximum_length(nums: Vec<i32>, k: i32) -> i32 {
-    return -1;
+    // Residuals.
+    let ress: Vec<i32> = nums.iter().map(|x| x % k).collect();
+    // Alternating residual subsequence lookup table.
+    let mut tbl = vec![vec![(-1, 0); k as usize]; k as usize];
+    for res in ress {
+        // Update tbl[i][res]
+        for i in 0..res {
+            let (prev, len) = tbl[i as usize][res as usize];
+            let len = match res == prev {
+                true => len,
+                false => len + 1,
+            };
+            tbl[i as usize][res as usize] = (res, len);
+        }
+        // Update tbl[res][res]
+        let (_, len) = tbl[res as usize][res as usize];
+        tbl[res as usize][res as usize] = (res, len + 1);
+        // Update tbl[res][i]
+        for i in res + 1..k {
+            let (prev, len) = tbl[res as usize][i as usize];
+            let len = match res == prev {
+                true => len,
+                false => len + 1,
+            };
+            tbl[res as usize][i as usize] = (res, len);
+        }
+    }
+    // Find the longest subsequence.
+    let max_len = tbl
+        .iter()
+        .map(|row| -> i32 { *row.iter().map(|(_, len)| len).max().unwrap() })
+        .max()
+        .unwrap();
+    max_len
 }
 
 #[cfg(test)]
