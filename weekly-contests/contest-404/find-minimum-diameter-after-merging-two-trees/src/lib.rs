@@ -21,27 +21,38 @@ fn get_neighbors(edges: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
 /// * `neighbors`: the neighbor lookup table of the graph.
 /// * `curr`: current node.
 fn bfs(neighbors: &Vec<Vec<i32>>, curr: i32) -> (i32, Vec<i32>) {
+    // Traversal parent.
+    let mut from = vec![curr; neighbors.len()];
     // BFS
     let mut visited: HashSet<i32> = HashSet::new();
-    let mut queue = VecDeque::from([(curr, vec![curr])]);
+    let mut queue = VecDeque::from([curr]);
+    // Last node in BFS.
+    let mut last = curr;
     while queue.len() != 0 {
-        let (curr, path) = queue.pop_front().unwrap();
+        let curr = queue.pop_front().unwrap();
         visited.insert(curr);
         // Push all the neighbors.
         for neighbor in &neighbors[curr as usize] {
             if visited.contains(neighbor) {
                 continue;
             }
-            let mut neighbor_path = path.clone();
-            neighbor_path.push(*neighbor);
-            queue.push_back((*neighbor, neighbor_path));
+            from[*neighbor as usize] = curr;
+            queue.push_back(*neighbor);
         }
         // Check if current node is the last node in the search.
         if queue.len() == 0 {
-            return (curr, path);
+            last = curr;
         }
     }
-    (curr, vec![curr])
+    let mut path = vec![];
+    let mut curr = last;
+    while from[curr as usize] != curr {
+        path.push(curr);
+        curr = from[curr as usize];
+    }
+    path.push(curr);
+    path.reverse();
+    (last, path)
 }
 
 /// Find the diameter and the center of the tree. Return the (diameter, center)
