@@ -39,4 +39,18 @@ pub fn minimum_cost(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_1() {
+        let target = String::from("abcdef");
+        let words = vec![
+            String::from("abdef"),
+            String::from("abc"),
+            String::from("d"),
+            String::from("def"),
+            String::from("ef"),
+        ];
+        let costs = vec![100, 1, 1, 10, 5];
+        assert_eq!(minimum_cost(target, words, costs), 7);
+    }
 }
