@@ -119,22 +119,30 @@ impl Trie {
     /// Find the cost of a string.
     ///
     /// * `s`: the string to find.
-    fn search(&self, s: &str) -> Option<i32> {
+    fn search(&self, s: &str) -> Vec<(usize, i32)> {
         // Base case.
         if s.len() == 0 {
             return match self.eow {
-                true => Some(self.cost),
-                false => None,
+                true => vec![(0, self.cost)],
+                false => Vec::new(),
             };
         }
+
+        // Current node.
+        let mut res = match self.eow {
+            true => vec![(s.len(), self.cost)],
+            false => Vec::new(),
+        };
 
         // Check child.
         let idx = s.as_bytes()[0] - 'a' as u8;
         assert!(idx < 26);
-        return match &self.children[idx as usize] {
-            Some(n) => n.search(&s[1..]),
-            None => None,
-        };
+
+        if let Some(n) = &self.children[idx as usize] {
+            res.extend(n.search(&s[1..]));
+        }
+
+        return res;
     }
 }
 
@@ -152,27 +160,31 @@ pub fn minimum_cost(
     let n = target.len();
     let mut dp = vec![0; n];
     for i in (0..n).rev() {
+        // Substring &target[1..]
         let mut min_cost: Option<i32> = None;
-        // Entire string match.
-        if let Some(cost) = trie.search(&target[i..]) {
-            min_cost = Some(cost);
-        }
-        // Match prefix in trie.
-        for j in i + 1..n {
-            if let Some(cost) = trie.search(&target[i..j]) {
-                if dp[j] != -1 {
-                    min_cost = match min_cost {
-                        None => Some(cost + dp[j]),
-                        Some(c) => Some(cmp::min(c, cost + dp[j])),
-                    }
-                }
+        let prefixes = trie.search(&target[i..]);
+        for (offset, cost) in prefixes {
+            // Full substring match.
+            if offset == 0 {
+                min_cost = match min_cost {
+                    Some(c) => Some(cmp::min(c, cost)),
+                    None => Some(cost),
+                };
+                continue;
             }
+            // Impossible construction.
+            if dp[n - offset] == -1 {
+                continue;
+            }
+            min_cost = match min_cost {
+                Some(c) => Some(cmp::min(c, cost + dp[n - offset])),
+                None => Some(cost + dp[n - offset]),
+            };
         }
-        // Result
         dp[i] = match min_cost {
             Some(c) => c,
             None => -1,
-        }
+        };
     }
 
     return dp[0];
@@ -185,14 +197,15 @@ mod tests {
     #[test]
     fn test_trie() {
         let mut trie = Trie::new();
+        trie.insert("an", 16);
         trie.insert("and", 69);
         trie.insert("ant", 42);
         trie.insert("dad", 37);
         trie.insert("do", 73);
         trie.insert("and", 42);
-        assert_eq!(trie.search("an"), None);
-        assert_eq!(trie.search("and"), Some(42));
-        assert_eq!(trie.search("ant"), Some(42));
+        assert_eq!(trie.search("an"), vec![(0, 16)]);
+        assert_eq!(trie.search("and"), vec![(1, 16), (0, 42)]);
+        assert_eq!(trie.search("ant"), vec![(1, 16), (0, 42)]);
     }
 
     #[test]
